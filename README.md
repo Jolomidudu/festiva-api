@@ -1,6 +1,6 @@
-# Festiva API
+# Festyvibe API
 
-NestJS + Prisma + PostgreSQL backend for Festiva.
+NestJS + Prisma + PostgreSQL backend for Festyvibe.
 
 ## Setup
 
