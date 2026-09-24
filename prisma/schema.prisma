@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum RsvpStatus {
+  PENDING
+  ATTENDING
+  MAYBE
+  NOT_ATTENDING
+}
+
+enum EventRole {
+  OWNER
+  CO_HOST
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  events       EventMember[]
+  guests       Guest[]
+}
+
+model Event {
+  id          String        @id @default(cuid())
+  name        String
+  date        DateTime
+  location    String
+  description String?
+  coverImage  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  members     EventMember[]
+  guests      Guest[]
+}
+
+model EventMember {
+  id      String    @id @default(cuid())
+  role    EventRole @default(OWNER)
+  userId  String
+  eventId String
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Guest {
+  id                 String     @id @default(cuid())
+  name               String
+  email              String?
+  phone              String?
+  status             RsvpStatus @default(PENDING)
+  plusOne             Boolean    @default(false)
+  dietaryRequirements String?
+  eventId            String
+  createdById        String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  event              Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdBy          User       @relation(fields: [createdById], references: [id])
+}
