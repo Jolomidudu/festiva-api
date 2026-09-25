@@ -31,6 +31,9 @@ let EventsController = class EventsController {
     findOne(user, id) {
         return this.events.findOne(user.sub, id);
     }
+    update(user, id, dto) {
+        return this.events.update(user.sub, id, dto);
+    }
     remove(user, id) {
         return this.events.remove(user.sub, id);
     }
@@ -59,6 +62,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], EventsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(":id"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(":id"),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

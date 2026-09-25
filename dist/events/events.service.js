@@ -24,35 +24,124 @@ let EventsService = class EventsService {
                 location: dto.location,
                 description: dto.description,
                 coverImage: dto.coverImage,
-                members: { create: { userId, role: "OWNER" } }
-            }
+                members: {
+                    create: {
+                        userId,
+                        role: "OWNER",
+                    },
+                },
+            },
         });
     }
     findMine(userId) {
         return this.prisma.event.findMany({
-            where: { members: { some: { userId } } },
-            include: { _count: { select: { guests: true } } },
-            orderBy: { date: "asc" }
+            where: {
+                members: {
+                    some: {
+                        userId,
+                    },
+                },
+            },
+            include: {
+                _count: {
+                    select: {
+                        guests: true,
+                    },
+                },
+            },
+            orderBy: {
+                date: "asc",
+            },
         });
     }
     async findOne(userId, id) {
         const event = await this.prisma.event.findFirst({
-            where: { id, members: { some: { userId } } },
-            include: { _count: { select: { guests: true } } }
+            where: {
+                id,
+                members: {
+                    some: {
+                        userId,
+                    },
+                },
+            },
+            include: {
+                _count: {
+                    select: {
+                        guests: true,
+                    },
+                },
+            },
         });
-        if (!event)
+        if (!event) {
             throw new common_1.NotFoundException("Event not found.");
+        }
         return event;
+    }
+    async update(userId, eventId, dto) {
+        const member = await this.prisma.eventMember.findUnique({
+            where: {
+                userId_eventId: {
+                    userId,
+                    eventId,
+                },
+            },
+        });
+        if (!member) {
+            throw new common_1.NotFoundException("Event not found.");
+        }
+        if (member.role !== "OWNER") {
+            throw new common_1.ForbiddenException("Only the owner can update this event.");
+        }
+        return this.prisma.event.update({
+            where: {
+                id: eventId,
+            },
+            data: {
+                ...(dto.name !== undefined && {
+                    name: dto.name,
+                }),
+                ...(dto.date !== undefined && {
+                    date: new Date(dto.date),
+                }),
+                ...(dto.location !== undefined && {
+                    location: dto.location,
+                }),
+                ...(dto.description !== undefined && {
+                    description: dto.description,
+                }),
+                ...(dto.coverImage !== undefined && {
+                    coverImage: dto.coverImage,
+                }),
+            },
+            include: {
+                _count: {
+                    select: {
+                        guests: true,
+                    },
+                },
+            },
+        });
     }
     async remove(userId, id) {
         const member = await this.prisma.eventMember.findUnique({
-            where: { userId_eventId: { userId, eventId: id } }
+            where: {
+                userId_eventId: {
+                    userId,
+                    eventId: id,
+                },
+            },
         });
         if (!member || member.role !== "OWNER") {
             throw new common_1.ForbiddenException("Only the owner can delete this event.");
         }
-        await this.prisma.event.delete({ where: { id } });
-        return { success: true };
+        await this.prisma.event.delete({
+            where: {
+                id,
+            },
+        });
+        return {
+            success: true,
+        };
     }
 };
 exports.EventsService = EventsService;

@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+
 import { EventsService } from "./events.service";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -10,7 +20,10 @@ export class EventsController {
   constructor(private events: EventsService) {}
 
   @Post()
-  create(@CurrentUser() user: any, @Body() dto: CreateEventDto) {
+  create(
+    @CurrentUser() user: any,
+    @Body() dto: CreateEventDto,
+  ) {
     return this.events.create(user.sub, dto);
   }
 
@@ -20,12 +33,27 @@ export class EventsController {
   }
 
   @Get(":id")
-  findOne(@CurrentUser() user: any, @Param("id") id: string) {
+  findOne(
+    @CurrentUser() user: any,
+    @Param("id") id: string,
+  ) {
     return this.events.findOne(user.sub, id);
   }
 
+  @Patch(":id")
+  update(
+    @CurrentUser() user: any,
+    @Param("id") id: string,
+    @Body() dto: Parameters<EventsService["update"]>[2],
+  ) {
+    return this.events.update(user.sub, id, dto);
+  }
+
   @Delete(":id")
-  remove(@CurrentUser() user: any, @Param("id") id: string) {
+  remove(
+    @CurrentUser() user: any,
+    @Param("id") id: string,
+  ) {
     return this.events.remove(user.sub, id);
   }
 }
