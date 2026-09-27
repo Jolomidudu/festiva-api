@@ -18,7 +18,12 @@ let GuestsService = class GuestsService {
     }
     async assertMember(userId, eventId) {
         const member = await this.prisma.eventMember.findUnique({
-            where: { userId_eventId: { userId, eventId } }
+            where: {
+                userId_eventId: {
+                    userId,
+                    eventId,
+                },
+            },
         });
         if (!member) {
             throw new common_1.ForbiddenException("You do not have access to this event.");
@@ -31,29 +36,81 @@ let GuestsService = class GuestsService {
                 name: dto.name,
                 email: dto.email,
                 phone: dto.phone,
+                status: dto.status ?? "PENDING",
                 plusOne: dto.plusOne ?? false,
                 dietaryRequirements: dto.dietaryRequirements,
                 eventId,
-                createdById: userId
-            }
+                createdById: userId,
+            },
         });
     }
     async findAll(userId, eventId) {
         await this.assertMember(userId, eventId);
         return this.prisma.guest.findMany({
-            where: { eventId },
-            orderBy: { name: "asc" }
+            where: {
+                eventId,
+            },
+            orderBy: {
+                name: "asc",
+            },
+        });
+    }
+    async update(userId, eventId, guestId, dto) {
+        await this.assertMember(userId, eventId);
+        const guest = await this.prisma.guest.findFirst({
+            where: {
+                id: guestId,
+                eventId,
+            },
+        });
+        if (!guest) {
+            throw new common_1.NotFoundException("Guest not found.");
+        }
+        return this.prisma.guest.update({
+            where: {
+                id: guestId,
+            },
+            data: {
+                ...(dto.name !== undefined && {
+                    name: dto.name,
+                }),
+                ...(dto.email !== undefined && {
+                    email: dto.email,
+                }),
+                ...(dto.phone !== undefined && {
+                    phone: dto.phone,
+                }),
+                ...(dto.status !== undefined && {
+                    status: dto.status,
+                }),
+                ...(dto.plusOne !== undefined && {
+                    plusOne: dto.plusOne,
+                }),
+                ...(dto.dietaryRequirements !== undefined && {
+                    dietaryRequirements: dto.dietaryRequirements,
+                }),
+            },
         });
     }
     async remove(userId, eventId, guestId) {
         await this.assertMember(userId, eventId);
         const guest = await this.prisma.guest.findFirst({
-            where: { id: guestId, eventId }
+            where: {
+                id: guestId,
+                eventId,
+            },
         });
-        if (!guest)
+        if (!guest) {
             throw new common_1.NotFoundException("Guest not found.");
-        await this.prisma.guest.delete({ where: { id: guestId } });
-        return { success: true };
+        }
+        await this.prisma.guest.delete({
+            where: {
+                id: guestId,
+            },
+        });
+        return {
+            success: true,
+        };
     }
 };
 exports.GuestsService = GuestsService;

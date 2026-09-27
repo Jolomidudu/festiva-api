@@ -14,10 +14,11 @@ export enum RsvpStatus {
   NOT_ATTENDING = "NOT_ATTENDING",
 }
 
-export class CreateGuestDto {
+export class UpdateGuestDto {
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  name!: string;
+  name?: string;
 
   @IsOptional()
   @IsEmail()

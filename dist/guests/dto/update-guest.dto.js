@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateGuestDto = exports.RsvpStatus = void 0;
+exports.UpdateGuestDto = exports.RsvpStatus = void 0;
 const class_validator_1 = require("class-validator");
 var RsvpStatus;
 (function (RsvpStatus) {
@@ -18,37 +18,38 @@ var RsvpStatus;
     RsvpStatus["MAYBE"] = "MAYBE";
     RsvpStatus["NOT_ATTENDING"] = "NOT_ATTENDING";
 })(RsvpStatus || (exports.RsvpStatus = RsvpStatus = {}));
-class CreateGuestDto {
+class UpdateGuestDto {
 }
-exports.CreateGuestDto = CreateGuestDto;
+exports.UpdateGuestDto = UpdateGuestDto;
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(2),
     __metadata("design:type", String)
-], CreateGuestDto.prototype, "name", void 0);
+], UpdateGuestDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
-], CreateGuestDto.prototype, "email", void 0);
+], UpdateGuestDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateGuestDto.prototype, "phone", void 0);
+], UpdateGuestDto.prototype, "phone", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(RsvpStatus),
     __metadata("design:type", String)
-], CreateGuestDto.prototype, "status", void 0);
+], UpdateGuestDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], CreateGuestDto.prototype, "plusOne", void 0);
+], UpdateGuestDto.prototype, "plusOne", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateGuestDto.prototype, "dietaryRequirements", void 0);
-//# sourceMappingURL=create-guest.dto.js.map
+], UpdateGuestDto.prototype, "dietaryRequirements", void 0);
+//# sourceMappingURL=update-guest.dto.js.map

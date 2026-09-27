@@ -18,6 +18,7 @@ const guests_service_1 = require("./guests.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
 const create_guest_dto_1 = require("./dto/create-guest.dto");
+const update_guest_dto_1 = require("./dto/update-guest.dto");
 let GuestsController = class GuestsController {
     constructor(guests) {
         this.guests = guests;
@@ -27,6 +28,9 @@ let GuestsController = class GuestsController {
     }
     findAll(user, eventId) {
         return this.guests.findAll(user.sub, eventId);
+    }
+    update(user, eventId, guestId, dto) {
+        return this.guests.update(user.sub, eventId, guestId, dto);
     }
     remove(user, eventId, guestId) {
         return this.guests.remove(user.sub, eventId, guestId);
@@ -50,6 +54,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], GuestsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Patch)(":guestId"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("eventId")),
+    __param(2, (0, common_1.Param)("guestId")),
+    __param(3, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, update_guest_dto_1.UpdateGuestDto]),
+    __metadata("design:returntype", void 0)
+], GuestsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(":guestId"),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
