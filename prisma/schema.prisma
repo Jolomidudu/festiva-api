@@ -41,6 +41,7 @@ model Event {
   updatedAt   DateTime      @updatedAt
   members     EventMember[]
   guests      Guest[]
+  invitations Invitation[]
 }
 
 model EventMember {
@@ -68,4 +69,29 @@ model Guest {
   updatedAt          DateTime   @updatedAt
   event              Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   createdBy          User       @relation(fields: [createdById], references: [id])
+  invitations Invitation[]
+}
+
+enum InvitationStatus {
+  DRAFT
+  SENT
+  OPENED
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  token       String           @unique
+  status      InvitationStatus @default(DRAFT)
+  sentAt      DateTime?
+  openedAt    DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  eventId     String
+  guestId     String
+
+  event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest       Guest            @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, guestId])
 }

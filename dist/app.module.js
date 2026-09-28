@@ -12,6 +12,7 @@ const config_1 = require("@nestjs/config");
 const prisma_module_1 = require("./prisma/prisma.module");
 const auth_module_1 = require("./auth/auth.module");
 const events_module_1 = require("./events/events.module");
+const invitations_module_1 = require("./invitations/invitations.module");
 const guests_module_1 = require("./guests/guests.module");
 let AppModule = class AppModule {
 };
@@ -23,7 +24,8 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
             events_module_1.EventsModule,
-            guests_module_1.GuestsModule
+            guests_module_1.GuestsModule,
+            invitations_module_1.InvitationsModule,
         ]
     })
 ], AppModule);
