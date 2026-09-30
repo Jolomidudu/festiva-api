@@ -4,19 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
-}
-
-enum RsvpStatus {
-  PENDING
-  ATTENDING
-  MAYBE
-  NOT_ATTENDING
-}
-
-enum EventRole {
-  OWNER
-  CO_HOST
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -49,49 +37,59 @@ model EventMember {
   role    EventRole @default(OWNER)
   userId  String
   eventId String
-  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   event   Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
 }
 
 model Guest {
-  id                 String     @id @default(cuid())
-  name               String
-  email              String?
-  phone              String?
-  status             RsvpStatus @default(PENDING)
-  plusOne             Boolean    @default(false)
+  id                  String       @id @default(cuid())
+  name                String
+  email               String?
+  phone               String?
+  status              RsvpStatus   @default(PENDING)
+  plusOne             Boolean      @default(false)
   dietaryRequirements String?
-  eventId            String
-  createdById        String
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  event              Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  createdBy          User       @relation(fields: [createdById], references: [id])
-  invitations Invitation[]
+  eventId             String
+  createdById         String
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  createdBy           User         @relation(fields: [createdById], references: [id])
+  event               Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  invitations         Invitation[]
+}
+
+model Invitation {
+  id        String           @id @default(cuid())
+  token     String           @unique
+  status    InvitationStatus @default(DRAFT)
+  sentAt    DateTime?
+  openedAt  DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  eventId   String
+  guestId   String
+  event     Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest     Guest            @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, guestId])
+}
+
+enum RsvpStatus {
+  PENDING
+  ATTENDING
+  MAYBE
+  NOT_ATTENDING
+}
+
+enum EventRole {
+  OWNER
+  CO_HOST
 }
 
 enum InvitationStatus {
   DRAFT
   SENT
   OPENED
-}
-
-model Invitation {
-  id          String           @id @default(cuid())
-  token       String           @unique
-  status      InvitationStatus @default(DRAFT)
-  sentAt      DateTime?
-  openedAt    DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  eventId     String
-  guestId     String
-
-  event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  guest       Guest            @relation(fields: [guestId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, guestId])
 }

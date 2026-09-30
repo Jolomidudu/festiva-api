@@ -6,15 +6,20 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CreateInvitationDto } from "./dto/create-invitation.dto";
 import { UpdateInvitationDto } from "./dto/update-invitation.dto";
 import { InvitationsService } from "./invitations.service";
 
 @Controller("events/:eventId/invitations")
+@UseGuards(JwtAuthGuard)
 export class InvitationsController {
-  constructor(private readonly invitationsService: InvitationsService) {}
+  constructor(
+    private readonly invitationsService: InvitationsService,
+  ) {}
 
   @Post()
   create(

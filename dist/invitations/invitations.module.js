@@ -8,14 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvitationsModule = void 0;
 const common_1 = require("@nestjs/common");
+const auth_module_1 = require("../auth/auth.module");
 const invitations_controller_1 = require("./invitations.controller");
+const public_invitations_controller_1 = require("./public-invitations.controller");
 const invitations_service_1 = require("./invitations.service");
 let InvitationsModule = class InvitationsModule {
 };
 exports.InvitationsModule = InvitationsModule;
 exports.InvitationsModule = InvitationsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [invitations_controller_1.InvitationsController],
+        imports: [auth_module_1.AuthModule],
+        controllers: [
+            invitations_controller_1.InvitationsController,
+            public_invitations_controller_1.PublicInvitationsController,
+        ],
         providers: [invitations_service_1.InvitationsService],
     })
 ], InvitationsModule);

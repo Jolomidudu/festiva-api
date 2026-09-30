@@ -19,11 +19,12 @@ exports.AuthModule = AuthModule = __decorate([
         imports: [
             jwt_1.JwtModule.register({
                 secret: process.env.JWT_SECRET ?? "change-me",
-                signOptions: { expiresIn: "7d" }
-            })
+                signOptions: { expiresIn: "7d" },
+            }),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService]
+        providers: [auth_service_1.AuthService],
+        exports: [jwt_1.JwtModule],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

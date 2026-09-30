@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvitationsController = void 0;
 const common_1 = require("@nestjs/common");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const create_invitation_dto_1 = require("./dto/create-invitation.dto");
 const update_invitation_dto_1 = require("./dto/update-invitation.dto");
 const invitations_service_1 = require("./invitations.service");
@@ -86,6 +87,7 @@ __decorate([
 ], InvitationsController.prototype, "remove", null);
 exports.InvitationsController = InvitationsController = __decorate([
     (0, common_1.Controller)("events/:eventId/invitations"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [invitations_service_1.InvitationsService])
 ], InvitationsController);
 //# sourceMappingURL=invitations.controller.js.map
