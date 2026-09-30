@@ -179,6 +179,35 @@ let InvitationsService = class InvitationsService {
             },
         });
     }
+    async submitPublicRsvp(token, status) {
+        const invitation = await this.prisma.invitation.findUnique({
+            where: {
+                token,
+            },
+            include: {
+                guest: true,
+                event: true,
+            },
+        });
+        if (!invitation) {
+            throw new common_1.NotFoundException("Invitation not found.");
+        }
+        const updatedGuest = await this.prisma.guest.update({
+            where: {
+                id: invitation.guestId,
+            },
+            data: {
+                status,
+            },
+        });
+        return {
+            success: true,
+            invitation: {
+                ...invitation,
+                guest: updatedGuest,
+            },
+        };
+    }
 };
 exports.InvitationsService = InvitationsService;
 exports.InvitationsService = InvitationsService = __decorate([

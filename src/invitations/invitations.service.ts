@@ -217,4 +217,39 @@ export class InvitationsService {
       },
     });
   }
+    async submitPublicRsvp(
+    token: string,
+    status: "PENDING" | "ATTENDING" | "MAYBE" | "NOT_ATTENDING",
+  ) {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: {
+        token,
+      },
+      include: {
+        guest: true,
+        event: true,
+      },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException("Invitation not found.");
+    }
+
+    const updatedGuest = await this.prisma.guest.update({
+      where: {
+        id: invitation.guestId,
+      },
+      data: {
+        status,
+      },
+    });
+
+    return {
+      success: true,
+      invitation: {
+        ...invitation,
+        guest: updatedGuest,
+      },
+    };
+  }
 }

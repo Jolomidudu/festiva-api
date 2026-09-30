@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicInvitationsController = void 0;
 const common_1 = require("@nestjs/common");
+const public_rsvp_dto_1 = require("./dto/public-rsvp.dto");
 const invitations_service_1 = require("./invitations.service");
 let PublicInvitationsController = class PublicInvitationsController {
     constructor(invitationsService) {
@@ -21,6 +22,9 @@ let PublicInvitationsController = class PublicInvitationsController {
     }
     getInvitation(token) {
         return this.invitationsService.getPublicInvitation(token);
+    }
+    submitRsvp(token, dto) {
+        return this.invitationsService.submitPublicRsvp(token, dto.status);
     }
 };
 exports.PublicInvitationsController = PublicInvitationsController;
@@ -31,6 +35,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PublicInvitationsController.prototype, "getInvitation", null);
+__decorate([
+    (0, common_1.Patch)(":token/rsvp"),
+    __param(0, (0, common_1.Param)("token")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, public_rsvp_dto_1.PublicRsvpDto]),
+    __metadata("design:returntype", void 0)
+], PublicInvitationsController.prototype, "submitRsvp", null);
 exports.PublicInvitationsController = PublicInvitationsController = __decorate([
     (0, common_1.Controller)("public/invitations"),
     __metadata("design:paramtypes", [invitations_service_1.InvitationsService])
