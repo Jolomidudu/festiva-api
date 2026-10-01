@@ -33,6 +33,122 @@ let EventsService = class EventsService {
             },
         });
     }
+    async findSchedule(userId, eventId) {
+        const event = await this.prisma.event.findFirst({
+            where: {
+                id: eventId,
+                members: {
+                    some: {
+                        userId,
+                    },
+                },
+            },
+        });
+        if (!event) {
+            throw new common_1.NotFoundException("Event not found.");
+        }
+        return this.prisma.eventScheduleItem.findMany({
+            where: {
+                eventId,
+            },
+            orderBy: {
+                startTime: "asc",
+            },
+        });
+    }
+    async createScheduleItem(userId, eventId, dto) {
+        const event = await this.prisma.event.findFirst({
+            where: {
+                id: eventId,
+                members: {
+                    some: {
+                        userId,
+                    },
+                },
+            },
+        });
+        if (!event) {
+            throw new common_1.NotFoundException("Event not found.");
+        }
+        return this.prisma.eventScheduleItem.create({
+            data: {
+                title: dto.title,
+                description: dto.description,
+                startTime: new Date(dto.startTime),
+                endTime: dto.endTime
+                    ? new Date(dto.endTime)
+                    : undefined,
+                location: dto.location,
+                eventId,
+            },
+        });
+    }
+    async updateScheduleItem(userId, eventId, scheduleItemId, dto) {
+        const item = await this.prisma.eventScheduleItem.findFirst({
+            where: {
+                id: scheduleItemId,
+                eventId,
+                event: {
+                    members: {
+                        some: {
+                            userId,
+                        },
+                    },
+                },
+            },
+        });
+        if (!item) {
+            throw new common_1.NotFoundException("Schedule item not found.");
+        }
+        return this.prisma.eventScheduleItem.update({
+            where: {
+                id: scheduleItemId,
+            },
+            data: {
+                ...(dto.title !== undefined && {
+                    title: dto.title,
+                }),
+                ...(dto.description !== undefined && {
+                    description: dto.description,
+                }),
+                ...(dto.startTime !== undefined && {
+                    startTime: new Date(dto.startTime),
+                }),
+                ...(dto.endTime !== undefined && {
+                    endTime: new Date(dto.endTime),
+                }),
+                ...(dto.location !== undefined && {
+                    location: dto.location,
+                }),
+            },
+        });
+    }
+    async removeScheduleItem(userId, eventId, scheduleItemId) {
+        const item = await this.prisma.eventScheduleItem.findFirst({
+            where: {
+                id: scheduleItemId,
+                eventId,
+                event: {
+                    members: {
+                        some: {
+                            userId,
+                        },
+                    },
+                },
+            },
+        });
+        if (!item) {
+            throw new common_1.NotFoundException("Schedule item not found.");
+        }
+        await this.prisma.eventScheduleItem.delete({
+            where: {
+                id: scheduleItemId,
+            },
+        });
+        return {
+            success: true,
+        };
+    }
     findMine(userId) {
         return this.prisma.event.findMany({
             where: {

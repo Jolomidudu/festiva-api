@@ -152,7 +152,15 @@ let InvitationsService = class InvitationsService {
             },
             include: {
                 guest: true,
-                event: true,
+                event: {
+                    include: {
+                        scheduleItems: {
+                            orderBy: {
+                                startTime: "asc",
+                            },
+                        },
+                    },
+                },
             },
         });
         if (!invitation) {
@@ -175,7 +183,15 @@ let InvitationsService = class InvitationsService {
             },
             include: {
                 guest: true,
-                event: true,
+                event: {
+                    include: {
+                        scheduleItems: {
+                            orderBy: {
+                                startTime: "asc",
+                            },
+                        },
+                    },
+                },
             },
         });
     }
@@ -186,7 +202,15 @@ let InvitationsService = class InvitationsService {
             },
             include: {
                 guest: true,
-                event: true,
+                event: {
+                    include: {
+                        scheduleItems: {
+                            orderBy: {
+                                startTime: "asc",
+                            },
+                        },
+                    },
+                },
             },
         });
         if (!invitation) {

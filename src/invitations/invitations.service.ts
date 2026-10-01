@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -101,7 +100,11 @@ export class InvitationsService {
     });
   }
 
-  async findOne(userId: string, eventId: string, invitationId: string) {
+  async findOne(
+    userId: string,
+    eventId: string,
+    invitationId: string,
+  ) {
     const invitation = await this.prisma.invitation.findFirst({
       where: {
         id: invitationId,
@@ -181,18 +184,29 @@ export class InvitationsService {
   }
 
   async getPublicInvitation(token: string) {
-    const invitation = await this.prisma.invitation.findUnique({
-      where: {
-        token,
-      },
-      include: {
-        guest: true,
-        event: true,
-      },
-    });
+    const invitation =
+      await this.prisma.invitation.findUnique({
+        where: {
+          token,
+        },
+        include: {
+          guest: true,
+          event: {
+            include: {
+              scheduleItems: {
+                orderBy: {
+                  startTime: "asc",
+                },
+              },
+            },
+          },
+        },
+      });
 
     if (!invitation) {
-      throw new NotFoundException("Invitation not found.");
+      throw new NotFoundException(
+        "Invitation not found.",
+      );
     }
 
     if (invitation.status === "SENT") {
@@ -213,36 +227,61 @@ export class InvitationsService {
       },
       include: {
         guest: true,
-        event: true,
+        event: {
+          include: {
+            scheduleItems: {
+              orderBy: {
+                startTime: "asc",
+              },
+            },
+          },
+        },
       },
     });
   }
-    async submitPublicRsvp(
+
+  async submitPublicRsvp(
     token: string,
-    status: "PENDING" | "ATTENDING" | "MAYBE" | "NOT_ATTENDING",
+    status:
+      | "PENDING"
+      | "ATTENDING"
+      | "MAYBE"
+      | "NOT_ATTENDING",
   ) {
-    const invitation = await this.prisma.invitation.findUnique({
-      where: {
-        token,
-      },
-      include: {
-        guest: true,
-        event: true,
-      },
-    });
+    const invitation =
+      await this.prisma.invitation.findUnique({
+        where: {
+          token,
+        },
+        include: {
+          guest: true,
+          event: {
+            include: {
+              scheduleItems: {
+                orderBy: {
+                  startTime: "asc",
+                },
+              },
+            },
+          },
+        },
+      });
 
     if (!invitation) {
-      throw new NotFoundException("Invitation not found.");
+      throw new NotFoundException(
+        "Invitation not found.",
+      );
     }
 
-    const updatedGuest = await this.prisma.guest.update({
-      where: {
-        id: invitation.guestId,
-      },
-      data: {
-        status,
-      },
-    });
+    const updatedGuest =
+      await this.prisma.guest.update({
+        where: {
+          id: invitation.guestId,
+        },
+        data: {
+          status,
+        },
+      });
 
     return {
       success: true,

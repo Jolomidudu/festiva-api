@@ -30,6 +30,23 @@ model Event {
   members     EventMember[]
   guests      Guest[]
   invitations Invitation[]
+  scheduleItems EventScheduleItem[]
+}
+
+model EventScheduleItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  location    String?
+  eventId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, startTime])
 }
 
 model EventMember {

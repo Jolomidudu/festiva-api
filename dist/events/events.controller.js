@@ -18,6 +18,8 @@ const events_service_1 = require("./events.service");
 const create_event_dto_1 = require("./dto/create-event.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const current_user_decorator_1 = require("../auth/current-user.decorator");
+const create_schedule_item_dto_1 = require("./dto/create-schedule-item.dto");
+const update_schedule_item_dto_1 = require("./dto/update-schedule-item.dto");
 let EventsController = class EventsController {
     constructor(events) {
         this.events = events;
@@ -36,6 +38,18 @@ let EventsController = class EventsController {
     }
     remove(user, id) {
         return this.events.remove(user.sub, id);
+    }
+    findSchedule(user, eventId) {
+        return this.events.findSchedule(user.sub, eventId);
+    }
+    createScheduleItem(user, eventId, dto) {
+        return this.events.createScheduleItem(user.sub, eventId, dto);
+    }
+    updateScheduleItem(user, eventId, scheduleItemId, dto) {
+        return this.events.updateScheduleItem(user.sub, eventId, scheduleItemId, dto);
+    }
+    removeScheduleItem(user, eventId, scheduleItemId) {
+        return this.events.removeScheduleItem(user.sub, eventId, scheduleItemId);
     }
 };
 exports.EventsController = EventsController;
@@ -79,6 +93,42 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], EventsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(":eventId/schedule"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("eventId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "findSchedule", null);
+__decorate([
+    (0, common_1.Post)(":eventId/schedule"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("eventId")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, create_schedule_item_dto_1.CreateScheduleItemDto]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "createScheduleItem", null);
+__decorate([
+    (0, common_1.Patch)(":eventId/schedule/:scheduleItemId"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("eventId")),
+    __param(2, (0, common_1.Param)("scheduleItemId")),
+    __param(3, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, update_schedule_item_dto_1.UpdateScheduleItemDto]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "updateScheduleItem", null);
+__decorate([
+    (0, common_1.Delete)(":eventId/schedule/:scheduleItemId"),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)("eventId")),
+    __param(2, (0, common_1.Param)("scheduleItemId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", void 0)
+], EventsController.prototype, "removeScheduleItem", null);
 exports.EventsController = EventsController = __decorate([
     (0, common_1.Controller)("events"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
