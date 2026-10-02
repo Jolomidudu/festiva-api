@@ -26,38 +26,121 @@ let AuthService = class AuthService {
         }
         const passwordHash = await bcrypt.hash(dto.password, 12);
         const user = await this.prisma.user.create({
-            data: { name: dto.name.trim(), email, passwordHash },
-            select: { id: true, name: true, email: true, createdAt: true }
+            data: {
+                name: dto.name.trim(),
+                email,
+                passwordHash,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true,
+            },
         });
         return this.issueToken(user);
     }
     async login(dto) {
         const email = dto.email.toLowerCase().trim();
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+        if (!user ||
+            !(await bcrypt.compare(dto.password, user.passwordHash))) {
             throw new common_1.UnauthorizedException("Invalid email or password.");
         }
         return this.issueToken({
             id: user.id,
             name: user.name,
             email: user.email,
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
         });
+    }
+    async updateProfile(userId, dto) {
+        const email = dto.email.toLowerCase().trim();
+        const name = dto.name.trim();
+        const existingUser = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+            },
+        });
+        if (!existingUser) {
+            throw new common_1.UnauthorizedException("User not found.");
+        }
+        const emailOwner = await this.prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+            },
+        });
+        if (emailOwner && emailOwner.id !== userId) {
+            throw new common_1.ConflictException("That email address is already in use.");
+        }
+        const user = await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                name,
+                email,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                createdAt: true,
+            },
+        });
+        return {
+            message: "Profile updated successfully.",
+            user,
+        };
+    }
+    async changePassword(userId, dto) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                passwordHash: true,
+            },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException("User not found.");
+        }
+        const currentPasswordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+        if (!currentPasswordValid) {
+            throw new common_1.UnauthorizedException("Current password is incorrect.");
+        }
+        if (dto.currentPassword === dto.newPassword) {
+            throw new common_1.ConflictException("New password must be different from your current password.");
+        }
+        const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                passwordHash,
+            },
+        });
+        return {
+            message: "Password changed successfully.",
+        };
     }
     async issueToken(user) {
         return {
             accessToken: await this.jwt.signAsync({
                 sub: user.id,
                 email: user.email,
-                name: user.name
+                name: user.name,
             }),
-            user
+            user,
         };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, jwt_1.JwtService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
