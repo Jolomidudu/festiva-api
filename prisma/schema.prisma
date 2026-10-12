@@ -19,18 +19,19 @@ model User {
 }
 
 model Event {
-  id          String        @id @default(cuid())
-  name        String
-  date        DateTime
-  location    String
-  description String?
-  coverImage  String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  members     EventMember[]
-  guests      Guest[]
-  invitations Invitation[]
-  scheduleItems EventScheduleItem[]
+  id               String            @id @default(cuid())
+  name             String
+  date             DateTime
+  location         String
+  description      String?
+  coverImage       String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  members          EventMember[]
+  guests            Guest[]
+  invitations      Invitation[]
+  scheduleItems    EventScheduleItem[]
+  preferences      EventPreference?
 }
 
 model EventScheduleItem {
@@ -93,6 +94,21 @@ model Invitation {
   @@unique([eventId, guestId])
 }
 
+model EventPreference {
+  id                     String         @id @default(cuid())
+  eventId                String         @unique
+  timezone               String         @default("Africa/Lagos")
+  rsvpDeadline           DateTime?
+  allowPlusOne            Boolean        @default(false)
+  allowRsvpChanges        Boolean        @default(true)
+  showGuestContactInfo    Boolean        @default(false)
+  visibility              EventVisibility @default(PRIVATE)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
 enum RsvpStatus {
   PENDING
   ATTENDING
@@ -109,4 +125,9 @@ enum InvitationStatus {
   DRAFT
   SENT
   OPENED
+}
+
+enum EventVisibility {
+  PRIVATE
+  PUBLIC
 }

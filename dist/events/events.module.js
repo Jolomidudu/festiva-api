@@ -11,7 +11,8 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const events_controller_1 = require("./events.controller");
 const events_service_1 = require("./events.service");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const event_preferences_controller_1 = require("./event-preferences.controller");
+const event_preferences_service_1 = require("./event-preferences.service");
 let EventsModule = class EventsModule {
 };
 exports.EventsModule = EventsModule;
@@ -20,8 +21,14 @@ exports.EventsModule = EventsModule = __decorate([
         imports: [
             jwt_1.JwtModule.register({ secret: process.env.JWT_SECRET ?? "change-me" })
         ],
-        controllers: [events_controller_1.EventsController],
-        providers: [events_service_1.EventsService, jwt_auth_guard_1.JwtAuthGuard]
+        controllers: [
+            events_controller_1.EventsController,
+            event_preferences_controller_1.EventPreferencesController,
+        ],
+        providers: [
+            events_service_1.EventsService,
+            event_preferences_service_1.EventPreferencesService,
+        ],
     })
 ], EventsModule);
 //# sourceMappingURL=events.module.js.map

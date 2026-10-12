@@ -146,90 +146,107 @@ let InvitationsService = class InvitationsService {
         };
     }
     async getPublicInvitation(token) {
-        const invitation = await this.prisma.invitation.findUnique({
-            where: {
-                token,
-            },
-            include: {
-                guest: true,
-                event: {
-                    include: {
-                        scheduleItems: {
-                            orderBy: {
-                                startTime: "asc",
-                            },
-                        },
-                    },
-                },
-            },
-        });
+        const invitation = await this.findPublicInvitationRecord(token);
         if (!invitation) {
-            throw new common_1.NotFoundException("Invitation not found.");
+            throw new common_1.BadRequestException("Invitation not found or invalid.");
         }
+        // Preserve the existing invitation-opened tracking.
         if (invitation.status === "SENT") {
             await this.prisma.invitation.update({
-                where: {
-                    id: invitation.id,
-                },
+                where: { id: invitation.id },
                 data: {
                     status: "OPENED",
                     openedAt: new Date(),
                 },
             });
         }
+        const refreshedInvitation = await this.findPublicInvitationRecord(token);
+        if (!refreshedInvitation) {
+            throw new common_1.BadRequestException("Invitation not found or invalid.");
+        }
+        return this.sanitizePublicInvitation(refreshedInvitation);
+    }
+    async findPublicInvitationRecord(token) {
         return this.prisma.invitation.findUnique({
-            where: {
-                id: invitation.id,
-            },
+            where: { token },
             include: {
                 guest: true,
                 event: {
                     include: {
                         scheduleItems: {
-                            orderBy: {
-                                startTime: "asc",
-                            },
+                            orderBy: { startTime: "asc" },
                         },
+                        preferences: true,
                     },
                 },
             },
         });
     }
+    sanitizePublicInvitation(invitation) {
+        const preferences = invitation.event.preferences ?? {
+            timezone: "Africa/Lagos",
+            rsvpDeadline: null,
+            allowPlusOne: false,
+            allowRsvpChanges: true,
+            showGuestContactInfo: false,
+            visibility: "PRIVATE",
+        };
+        const guest = preferences.showGuestContactInfo
+            ? invitation.guest
+            : {
+                ...invitation.guest,
+                email: null,
+                phone: null,
+            };
+        return {
+            ...invitation,
+            guest,
+            event: {
+                ...invitation.event,
+                preferences,
+            },
+        };
+    }
     async submitPublicRsvp(token, status) {
-        const invitation = await this.prisma.invitation.findUnique({
-            where: {
-                token,
-            },
-            include: {
-                guest: true,
-                event: {
-                    include: {
-                        scheduleItems: {
-                            orderBy: {
-                                startTime: "asc",
-                            },
-                        },
-                    },
-                },
-            },
-        });
+        const invitation = await this.findPublicInvitationRecord(token);
         if (!invitation) {
-            throw new common_1.NotFoundException("Invitation not found.");
+            throw new common_1.BadRequestException("Invitation not found or invalid.");
         }
-        const updatedGuest = await this.prisma.guest.update({
-            where: {
-                id: invitation.guestId,
-            },
-            data: {
-                status,
-            },
-        });
+        const preferences = invitation.event.preferences ?? {
+            timezone: "Africa/Lagos",
+            rsvpDeadline: null,
+            allowPlusOne: false,
+            allowRsvpChanges: true,
+            showGuestContactInfo: false,
+            visibility: "PRIVATE",
+        };
+        // Reject submissions after the configured RSVP deadline.
+        if (preferences.rsvpDeadline &&
+            Date.now() > new Date(preferences.rsvpDeadline).getTime()) {
+            throw new common_1.BadRequestException("The RSVP deadline has passed. Responses are now closed.");
+        }
+        const currentStatus = invitation.guest.status;
+        // Allow an identical repeat request, but reject a change
+        // after the guest has responded if changes are disabled.
+        if (!preferences.allowRsvpChanges &&
+            currentStatus !== "PENDING" &&
+            currentStatus !== status) {
+            throw new common_1.BadRequestException("RSVP changes are disabled for this event.");
+        }
+        // An identical repeat request needs no database update.
+        if (currentStatus !== status) {
+            await this.prisma.guest.update({
+                where: { id: invitation.guestId },
+                data: { status },
+            });
+        }
+        const updatedInvitation = await this.findPublicInvitationRecord(token);
+        if (!updatedInvitation) {
+            throw new common_1.BadRequestException("Invitation not found or invalid.");
+        }
         return {
             success: true,
-            invitation: {
-                ...invitation,
-                guest: updatedGuest,
-            },
+            invitation: this.sanitizePublicInvitation(updatedInvitation),
         };
     }
 };
